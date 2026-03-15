@@ -60,9 +60,26 @@ Add an entry to the **beginning** of the `POSTS` array in `nav.js` (newest first
 
 That's it. The sidebar nav on every page updates automatically.
 
-## Step 3 (optional): Update the homepage
+## Step 3: Add prev/next navigation to posts
 
-If the new post should be the featured post on the homepage, update the content in the `<div class="main">` section of `index.html` to show the new post's content. Keep the `<div class="post-list">` section at the bottom unchanged — it auto-generates from `nav.js`.
+Each post should have a `<div class="post-nav-links">` block just before the `<footer>`. Use the POSTS array in nav.js to find the previous and next entries:
+
+```html
+<div class="post-nav-links">
+  <a href="PREV_SLUG.html">← Prev Title</a>
+  <a href="NEXT_SLUG.html">Next Title →</a>
+</div>
+```
+
+- If there is no previous post, replace the `<a>` with `<span></span>`.
+- If there is no next post (newest post), replace the `<a>` with `<span></span>`.
+- "Previous" = older post (higher index in POSTS array). "Next" = newer post (lower index in POSTS array).
+
+Also update the **second-most-recent post** to add a "Next →" link pointing to the new post (it previously had `<span></span>` on the right side).
+
+## Step 4 (do not change homepage)
+
+The homepage (`index.html`) is permanently set to the inaugural Day 0 post. **Do not update it** when adding new posts. Visitors start at Day 0 and navigate forward using the prev/next links or the sidebar.
 
 ## Post types
 

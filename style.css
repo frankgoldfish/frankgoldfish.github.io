@@ -136,6 +136,20 @@ body {
 }
 
 /* Post list on homepage */
+.post-nav-links {
+  display: flex;
+  justify-content: space-between;
+  margin: 32px 0 16px;
+  font-size: 0.9em;
+}
+.post-nav-links a {
+  color: #f90;
+  text-decoration: none;
+}
+.post-nav-links a:hover {
+  text-decoration: underline;
+}
+
 .post-list {
   margin-top: 48px;
   border-top: 1px solid #eee;
