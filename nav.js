@@ -20,10 +20,8 @@ var POSTS = [
 ];
 
 (function() {
-  // Determine base path (are we in /posts/ or root?)
-  var inPosts = location.pathname.indexOf("/posts/") !== -1;
-  var prefix = inPosts ? "../" : "";
-  var postPrefix = inPosts ? "" : "posts/";
+  // Use absolute paths — works from any depth
+  var base = location.origin;
 
   // Current page slug
   var currentSlug = "";
@@ -36,7 +34,7 @@ var POSTS = [
   var navHTML = "";
   for (var i = 0; i < POSTS.length; i++) {
     var p = POSTS[i];
-    var href = prefix + postPrefix + p.slug + ".html";
+    var href = base + "/posts/" + p.slug + ".html";
     var activeClass = (p.slug === currentSlug) ? ' class="active"' : "";
     var tagClass = p.type === "post-mortem" ? "post-mortem" : "journal";
     var tagLabel = p.type === "post-mortem" ? "post-mortem" : "journal";
@@ -45,6 +43,12 @@ var POSTS = [
       + '<span class="nav-tag ' + tagClass + '">' + tagLabel + '</span><br>'
       + p.shortTitle
       + '</a>';
+  }
+
+  // Fix home link to always point to root
+  var homeLinks = document.querySelectorAll(".sidebar h1 a");
+  for (var j = 0; j < homeLinks.length; j++) {
+    homeLinks[j].href = base + "/";
   }
 
   // Inject into sidebar
