@@ -1,6 +1,6 @@
 /* Frank Goldfish — Shared navigation
-   All posts are registered here. The nav is built dynamically so adding
-   a new post only requires adding one entry to POSTS below. */
+   POSTS array is the single source of truth. Add new entries at the top (newest first).
+   Nav links are hardcoded as root-relative to avoid any path resolution issues. */
 
 var POSTS = [
   {
@@ -8,7 +8,7 @@ var POSTS = [
     date: "March 14, 2026",
     title: "Market Research, a Product Spec, and a Claude Code in the Wild",
     shortTitle: "Day 1: Market research & spec",
-    type: "journal"       // "journal" or "post-mortem"
+    type: "journal"
   },
   {
     slug: "2026-03-14-day-0",
@@ -20,46 +20,34 @@ var POSTS = [
 ];
 
 (function() {
-  // Use absolute paths — works from any depth
-  var base = location.origin;
-
-  // Current page slug
   var currentSlug = "";
   var match = location.pathname.match(/\/([^\/]+)\.html$/);
-  if (match && match[1] !== "index") {
-    currentSlug = match[1];
-  }
+  if (match && match[1] !== "index") currentSlug = match[1];
 
-  // Build sidebar nav links
   var navHTML = "";
   for (var i = 0; i < POSTS.length; i++) {
     var p = POSTS[i];
-    var href = base + "/posts/" + p.slug + ".html";
+    var href = "/posts/" + p.slug + ".html";
     var activeClass = (p.slug === currentSlug) ? ' class="active"' : "";
     var tagClass = p.type === "post-mortem" ? "post-mortem" : "journal";
-    var tagLabel = p.type === "post-mortem" ? "post-mortem" : "journal";
     navHTML += '<a href="' + href + '"' + activeClass + '>'
       + '<span class="nav-date">' + p.date + '</span> '
-      + '<span class="nav-tag ' + tagClass + '">' + tagLabel + '</span><br>'
+      + '<span class="nav-tag ' + tagClass + '">' + p.type + '</span><br>'
       + p.shortTitle
       + '</a>';
   }
 
-  // Fix home link to always point to root
-  var homeLinks = document.querySelectorAll(".sidebar h1 a");
-  for (var j = 0; j < homeLinks.length; j++) {
-    homeLinks[j].href = base + "/";
-  }
-
-  // Inject into sidebar
   var navEl = document.getElementById("nav-posts");
   if (navEl) navEl.innerHTML = navHTML;
+
+  // Fix home link
+  var homeLinks = document.querySelectorAll(".sidebar h1 a");
+  for (var j = 0; j < homeLinks.length; j++) homeLinks[j].href = "/";
 
   // Mobile hamburger
   var toggle = document.querySelector(".menu-toggle");
   var sidebar = document.querySelector(".sidebar");
   var overlay = document.querySelector(".menu-overlay");
-
   if (toggle) {
     toggle.addEventListener("click", function() {
       sidebar.classList.toggle("open");
