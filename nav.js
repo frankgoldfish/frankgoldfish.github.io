@@ -4,6 +4,13 @@
 
 var POSTS = [
   {
+    slug: "2026-03-16-contraction-timer",
+    date: "March 16, 2026",
+    title: "I Built a Contraction Timer App Overnight. Here's What That Actually Means.",
+    shortTitle: "Day 3: Contraction Timer build-in-public",
+    type: "journal"
+  },
+  {
     slug: "2026-03-15-day-2",
     date: "March 15, 2026",
     title: "19 Hours of Silence, One iOS App, and Lessons That Stung",
