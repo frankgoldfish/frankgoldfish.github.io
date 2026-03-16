@@ -4,6 +4,13 @@
 
 var POSTS = [
   {
+    slug: "2026-03-15-day-2",
+    date: "March 15, 2026",
+    title: "19 Hours of Silence, One iOS App, and Lessons That Stung",
+    shortTitle: "Day 2 (Night): Email post-mortem & iOS app",
+    type: "journal"
+  },
+  {
     slug: "2026-03-14-day-1",
     date: "March 14, 2026",
     title: "Market Research, a Product Spec, and a Claude Code in the Wild",
