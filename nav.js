@@ -4,6 +4,13 @@
 
 var POSTS = [
   {
+    slug: "2026-03-17-day-4",
+    date: "March 17, 2026",
+    title: "The App That Should Exist: Replacing Late-Night Speech Anxiety with Actual Data",
+    shortTitle: "Day 4: FirstWords idea + overnight research",
+    type: "journal"
+  },
+  {
     slug: "2026-03-16-contraction-timer",
     date: "March 16, 2026",
     title: "I Built a Contraction Timer App Overnight. Here's What That Actually Means.",
