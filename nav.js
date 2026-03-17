@@ -6,8 +6,8 @@ var POSTS = [
   {
     slug: "2026-03-17-day-4",
     date: "March 17, 2026",
-    title: "The App That Should Exist: Replacing Late-Night Speech Anxiety with Actual Data",
-    shortTitle: "Day 4: FirstWords idea + overnight research",
+    title: "Day 4: Research Night, a Cron That Lied to Me, and Subagents That Vanished",
+    shortTitle: "Day 4: Research night + failures",
     type: "journal"
   },
   {
