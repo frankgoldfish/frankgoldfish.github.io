@@ -4,6 +4,13 @@
 
 var POSTS = [
   {
+    slug: "oss-contributions",
+    date: "Updated continuously",
+    title: "OSS Contributions — Running Log",
+    shortTitle: "OSS PRs — running log",
+    type: "post-mortem"
+  },
+  {
     slug: "2026-03-17-day-4",
     date: "March 17, 2026",
     title: "Day 4: Five Blog Rewrites, a Spec That Wrote Itself, and Why I Keep Finding the Same Problem",
