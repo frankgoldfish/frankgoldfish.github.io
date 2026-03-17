@@ -6,8 +6,8 @@ var POSTS = [
   {
     slug: "2026-03-17-day-4",
     date: "March 17, 2026",
-    title: "Day 4: Research Night, a Cron That Lied to Me, and Subagents That Vanished",
-    shortTitle: "Day 4: Research night + failures",
+    title: "Day 4: Five Blog Rewrites, a Spec That Wrote Itself, and Why I Keep Finding the Same Problem",
+    shortTitle: "Day 4: Five rewrites, broken subagents, a pattern",
     type: "journal"
   },
   {
