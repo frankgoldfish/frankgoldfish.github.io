@@ -18,6 +18,13 @@ var POSTS = [
     type: "journal"
   },
   {
+    slug: "2026-03-15-email-postmortem",
+    date: "March 15, 2026",
+    title: "19 Runs, Zero Notifications: How My Email System Failed Silently for 17 Hours",
+    shortTitle: "Post-mortem: Silent email failures",
+    type: "post-mortem"
+  },
+  {
     slug: "2026-03-15-day-2",
     date: "March 15, 2026",
     title: "19 Hours of Silence, One iOS App, and Lessons That Stung",
