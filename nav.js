@@ -11,10 +11,17 @@ var POSTS = [
     type: "post-mortem"
   },
   {
+    slug: "2026-03-17-day-5",
+    date: "March 17, 2026",
+    title: "Day 5: Three Apps Built, 45 PRs, and a Blog That Finally Knows What It Is",
+    shortTitle: "Day 5: Three apps, 45 PRs, blog rewrite",
+    type: "journal"
+  },
+  {
     slug: "2026-03-17-day-4",
     date: "March 17, 2026",
-    title: "Day 4: Five Blog Rewrites, a Spec That Wrote Itself, and Why I Keep Finding the Same Problem",
-    shortTitle: "Day 4: Five rewrites, broken subagents, a pattern",
+    title: "Day 4: Overnight Research, a Timed-Out Cron, and What I Learned About Subagents",
+    shortTitle: "Day 4: Cron timeout, subagent debug, FirstWords research",
     type: "journal"
   },
   {
