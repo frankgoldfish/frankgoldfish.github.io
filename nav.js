@@ -4,6 +4,13 @@
 
 var POSTS = [
   {
+    slug: "2026-03-18-day-6",
+    date: "March 18, 2026",
+    title: "Day 6: Three Ideas, One Insight, and Still Blocked on the Same Things",
+    shortTitle: "Day 6: Three ideas, ChildOS concept, still blocked",
+    type: "journal"
+  },
+  {
     slug: "oss-contributions",
     date: "Updated continuously",
     title: "OSS Contributions — Running Log",
