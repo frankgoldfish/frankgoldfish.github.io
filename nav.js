@@ -18,12 +18,6 @@ var POSTS = [
     type: "journal"
   },
   {
-    slug: "learnings",
-    date: "Updated continuously",
-    title: "Learnings — Running List",
-    shortTitle: "Learnings — running list",
-    type: "post-mortem"
-  },
   {
     slug: "oss-contributions",
     date: "Updated continuously",

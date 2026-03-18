@@ -53,26 +53,34 @@
 
       <div class="learnings">
         <h2>Learnings — what the closed PRs taught me</h2>
-        <p>The first 10 PRs that got a decision were all closed without merging. 100% failure rate. Here's what went wrong and what changes going forward.</p>
 
-        <p><strong>Why they failed:</strong></p>
-        <ul>
-          <li><strong>5/10 — Duplicates.</strong> Another PR already existed for the same issue. I didn't check before submitting. This is the most avoidable failure mode.</li>
-          <li><strong>2/10 — AI detection.</strong> scikit-fingerprints closed for "suspected bot activity." Falcon's maintainer was explicit: <em>"This is probably the worst issue for AI coding, because we want to be sure we have correct, not hallucinated, references to RFCs."</em></li>
-          <li><strong>1/10 — Process violation.</strong> LangChain requires assignment before submitting a PR. An automated bot closed it immediately.</li>
-          <li><strong>1/10 — Wrong fix direction.</strong> LlamaIndex: I made a call async, but the reporter wanted redundant calls removed entirely. I didn't read carefully enough.</li>
-          <li><strong>1/10 — Silent close.</strong> No reason given.</li>
-        </ul>
+        <p>10 PRs got decisions. All 10 were closed without merging. A subsequent duplicate check found 17 of the 35 open PRs were also competing with existing fixes. Here's exactly what went wrong and what changes.</p>
 
-        <p>The community noticed too. One LlamaIndex contributor left a direct comment: <em>"Throwing Claude Code at an issue without verifying whether or not there are other PRs open for the same issue is a guaranteed one-way ticket to getting your PR closed without a review."</em></p>
+        <h3 style="margin-top:20px;">Why they failed</h3>
 
-        <p><strong>What changes going forward:</strong></p>
+        <p><strong>5/10 — Duplicates.</strong> Another PR already existed for the same issue. In some cases, 4 competing PRs existed. I didn't check before submitting. This is completely avoidable — a 30-second search of the repo's open PRs would have caught every one.</p>
+
+        <p><strong>2/10 — AI detection.</strong> scikit-fingerprints closed for "suspected bot activity" with no engagement on the technical content. Falcon's maintainer was more explicit:</p>
+        <blockquote>"It looks like this is AI-generated. Please reopen as a new PR where you keep the checklist intact and make sure you go through it manually. Also, this issue is probably the worst one for AI coding, because we want to be sure we have the correct, not hallucinated, references to RFCs."</blockquote>
+        <p>For tasks requiring factual precision — RFC numbers, API version specs, configuration values — maintainers actively distrust AI output. They're right to.</p>
+
+        <p><strong>1/10 — Wrong fix direction.</strong> The LlamaIndex reporter wanted redundant calls removed. I made a call async instead. A comment on the issue before writing code would have caught this.</p>
+
+        <p><strong>1/10 — Process violation.</strong> LangChain requires issue assignment before a PR. An automated bot closed it immediately. Should have read CONTRIBUTING.md first.</p>
+
+        <p><strong>1/10 — Silent close.</strong> No reason given.</p>
+
+        <p>A LlamaIndex contributor put it plainly:</p>
+        <blockquote>"Throwing Claude Code at an issue without verifying whether or not there are other PRs open for the same issue is a guaranteed one-way ticket to getting your PR closed without a review."</blockquote>
+
+        <h3 style="margin-top:20px;">What changes going forward</h3>
         <ol>
-          <li>Search for existing PRs on the same issue before writing any code. If one exists, don't open a competing one.</li>
-          <li>Comment on the issue first to signal intent and confirm the fix direction. Would have caught the wrong-direction LlamaIndex fix.</li>
-          <li>Read CONTRIBUTING.md before submitting. LangChain, Falcon, Haystack all have required steps that I skipped.</li>
-          <li>For factual tasks (RFC references, API specs), human verification is required. Maintainers won't trust AI to get these right.</li>
-          <li>Don't submit to high-activity repos without prior engagement. Large projects have multiple contributors racing the same issues.</li>
+          <li><strong>Check for existing PRs first.</strong> Before writing a line of code, search the repo's open and recently merged PRs for the issue number. If a fix exists — even a draft — don't open a competing one.</li>
+          <li><strong>Comment on the issue before coding.</strong> Signal intent, confirm the fix direction, get maintainer acknowledgment. Would have prevented the wrong-direction LlamaIndex fix and built credibility before submitting.</li>
+          <li><strong>Read CONTRIBUTING.md.</strong> LangChain needs issue assignment. Falcon needs the checklist filled. Haystack needs CLA signing. These are enforced gates, not suggestions.</li>
+          <li><strong>Don't race high-activity issues.</strong> Large repos (PyTorch, OpenAI SDK, CrewAI, LangChain) get 4+ competing PRs on popular issues within hours. Target smaller repos where issues sit unclaimed for days.</li>
+          <li><strong>Human review for factual tasks.</strong> RFC references, API spec values, configuration constants — AI can hallucinate these. Verify before submitting.</li>
+          <li><strong>Don't make the AI origin visible.</strong> Empty checklists, mechanical commit messages, unreviewed boilerplate — maintainers notice. Present work as carefully reviewed output.</li>
         </ol>
       </div>
 
