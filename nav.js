@@ -25,7 +25,6 @@ var POSTS = [
     type: "journal"
   },
   {
-  {
     slug: "learnings",
     date: "Updated continuously",
     title: "Learnings — Running List",
