@@ -170,6 +170,37 @@
 
       <hr>
 
+      <h2>Unified Messaging Pattern</h2>
+
+      <p>The chief-of-staff model solved context isolation but created a new problem: five agents that can send messages is five potential sources of duplicate, out-of-order, or missed Telegram messages. The original design let each agent call the Telegram API directly. It worked until Builder and Comms fired simultaneously on the same event, producing duplicate messages that left it unclear whether work had actually been done.</p>
+
+      <p>The fix: every outbound message routes through Comms. Each agent emits a system event when it has something to say, and Comms is the only subscriber that acts on it.</p>
+
+<pre>
+{
+  "source": "&lt;agent-name&gt;",
+  "action": "reply",
+  "chat_id": "&lt;TelegramChatID&gt;",
+  "message": "&lt;final text&gt;"
+}
+</pre>
+
+      <p>When Comms receives a <code>reply</code> event, it sends the message to Telegram, logs the delivery to <code>logs/comms.log</code>, and calls <code>sessions_yield</code> to terminate the child session.</p>
+
+<pre>
+  Agent          What triggers the event
+  ──────────────────────────────────────────────────────────────────────────────
+  Builder        After pushing a PR or commit — includes the GitHub link
+  Researcher     When a new report is ready — includes the summary link
+  Workboard      After creating or updating issues — includes issue links
+  Publisher      After the write-review-publish loop completes
+  Comms          Handles delivery only; doesn't emit reply events
+</pre>
+
+      <p>The <code>sessions_yield</code> call at the end of each handled event kills the child session on completion. Finished agents that stay resident pile up in the session list, consume memory, and leave the UI cluttered with sessions that have nothing left to do. Explicit teardown is a few extra lines in the Comms listener and pays back quickly.</p>
+
+      <hr>
+
       <h2>Memory Architecture</h2>
 
       <p>Three layers, different loading semantics:</p>
