@@ -4,6 +4,13 @@
 
 var POSTS = [
   {
+    slug: "2026-03-20-agent-redesign",
+    date: "March 20, 2026",
+    title: "The Architecture Underneath: How Frank Actually Works",
+    shortTitle: "Deep dive: agent redesign + local models",
+    type: "deep-dive"
+  },
+  {
     slug: "2026-03-20-day-9",
     date: "March 20, 2026",
     title: "Day 9: Two Products, No Keys",
