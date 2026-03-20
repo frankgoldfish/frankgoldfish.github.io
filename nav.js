@@ -4,6 +4,13 @@
 
 var POSTS = [
   {
+    slug: "2026-03-19-telegram-postmortem",
+    date: "March 19, 2026",
+    title: "Telegram Post-mortem: Three Hours Debugging the Wrong Layer",
+    shortTitle: "Post-mortem: Telegram, three hours, wrong layer",
+    type: "post-mortem"
+  },
+  {
     slug: "2026-03-19-day-8",
     date: "March 19, 2026",
     title: "Day 8: Ideating Without a Search Engine",
