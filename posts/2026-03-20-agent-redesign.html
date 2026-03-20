@@ -41,7 +41,7 @@
 
       <h2>The Architecture: Chief of Staff Model</h2>
 
-      <p>The redesign separates concerns at the session level. Frank (main) owns the conversation and delegation. Five specialist agents own execution.</p>
+      <p>The redesign separates concerns at the session level. Frank (main) owns the conversation, delegation, and all outbound messaging. Four specialist agents own execution.</p>
 
 <pre>
               ┌──────────────────────────────────────┐
@@ -55,18 +55,35 @@
                         │  Conversation layer  │
                         │  Memory management   │
                         │  Judgment + routing  │
+                        │  Telegram delivery   │
                         │  Delegation          │
                         └──────────┬───────────┘
                                    │
-       ┌──────────┬────────────────┼──────────────┬───────────┐
-       │          │                │              │           │
-  ┌────▼────┐ ┌───▼──────┐ ┌──────▼───┐ ┌────────▼──┐ ┌──────▼────┐
-  │ Builder │ │Researcher│ │ Publisher│ │   Comms   │ │ Workboard │
-  │         │ │          │ │          │ │           │ │           │
-  │ Builds  │ │ Market   │ │ Blog     │ │ Email     │ │ GitHub    │
-  │ Commits │ │ Tech     │ │ Social   │ │ Calendar  │ │ Issues    │
-  │ Ships   │ │ Ideas    │ │ Emails   │ │ Triage    │ │ Cleanup   │
-  └─────────┘ └──────────┘ └──────────┘ └───────────┘ └───────────┘
+            ┌──────────┬───────────┴──────────┬───────────┐
+            │          │                      │           │
+       ┌────▼────┐ ┌───▼──────┐ ┌─────────────▼┐ ┌───────▼───┐
+       │ Builder │ │Researcher│ │  Publisher   │ │ Workboard │
+       │         │ │          │ │              │ │           │
+       │ Builds  │ │ Market   │ │ Blog         │ │ GitHub    │
+       │ Commits │ │ Tech     │ │ Social       │ │ Issues    │
+       │ Ships   │ │ Ideas    │ │ Emails       │ │ Cleanup   │
+       └─────────┘ └──────────┘ └──────────────┘ └───────────┘
+</pre>
+
+      <p>The current agent roster:</p>
+
+<pre>
+  Agent          Primary Responsibility                           Model
+  ────────────────────────────────────────────────────────────────────────────────────────
+  Frank (main)   Entry point, triage, routing, all Telegram      ollama/qwen3-coder:latest
+                 delivery, memory management
+  Builder        Code generation via Claude Code, commits,        ollama/gpt-oss:20b
+                 ships
+  Researcher     Market and technical research, sourced           ollama/gpt-oss:20b
+                 reports
+  Publisher      All writing (blog, social, email).               anthropic/claude-sonnet-4-6
+                 Write-review-publish loop.
+  Workboard      GitHub issue management and cleanup              ollama/gpt-oss:20b
 </pre>
 
       <p>Each specialist is defined by an AGENT.md — a document the agent reads at session start, not a system prompt. This distinction matters. A system prompt is invisible and locked to the infrastructure. An AGENT.md is a file: version-controlled, inspectable, editable without touching any config. When agent behavior needs to change, you edit a markdown file.</p>
@@ -158,7 +175,7 @@
 
       <h3>comms-log.jsonl</h3>
 
-      <p>Append-only, one JSON object per line, channel-agnostic. Solves the cross-channel state problem: Comms agent queries Gmail, Frank gets Telegram in session, but no single agent has the full picture. The log unifies both:</p>
+      <p>Append-only, one JSON object per line, channel-agnostic. Solves the cross-channel state problem: Frank handles Telegram, Gmail runs via OAuth, but no single agent has the full picture across both. The log unifies them:</p>
 
 <pre>
 {"ts":1742340000,"channel":"telegram","from":"amandeep","body":"deploy ai sleep plan next"}
@@ -166,15 +183,15 @@
 {"ts":1742340120,"channel":"telegram","from":"frank","body":"on it — pushing tonight"}
 </pre>
 
-      <p>Any agent can reconstruct the full conversation thread across channels from this log without access to the actual email account or session history. Workboard agent can see "Amandeep said deploy AI Sleep Plan" in Telegram and correctly prioritize without Frank explicitly relaying it.</p>
+      <p>Any agent can reconstruct the full conversation thread across channels from this log without access to the actual email account or session history. Workboard can see "Amandeep said deploy AI Sleep Plan" in Telegram and correctly prioritize without Frank explicitly relaying it.</p>
 
       <hr>
 
       <h2>Unified Messaging Pattern</h2>
 
-      <p>The chief-of-staff model solved context isolation but created a new problem: five agents that can send messages is five potential sources of duplicate, out-of-order, or missed Telegram messages. The original design let each agent call the Telegram API directly. It worked until Builder and Comms fired simultaneously on the same event, producing duplicate messages that left it unclear whether work had actually been done.</p>
+      <p>The chief-of-staff model solved context isolation but created a new problem: four specialist agents that each send Telegram messages directly means four potential sources of duplicate, out-of-order, or dropped notifications. The original design had a separate Comms agent handling delivery. That agent has since been retired. Its responsibilities moved to Frank.</p>
 
-      <p>The fix: every outbound message routes through Comms. Each agent emits a system event when it has something to say, and Comms is the only subscriber that acts on it.</p>
+      <p>Frank is now the sole dispatcher. Each specialist emits a system event when it has something to report, and Frank is the only subscriber that acts on it.</p>
 
 <pre>
 {
@@ -185,7 +202,7 @@
 }
 </pre>
 
-      <p>When Comms receives a <code>reply</code> event, it sends the message to Telegram, logs the delivery to <code>logs/comms.log</code>, and calls <code>sessions_yield</code> to terminate the child session.</p>
+      <p>When Frank receives a <code>reply</code> event, it sends the message to Telegram, logs the delivery to <code>logs/comms.log</code>, and calls <code>sessions_yield</code> to terminate the child session.</p>
 
 <pre>
   Agent          What triggers the event
@@ -194,10 +211,9 @@
   Researcher     When a new report is ready — includes the summary link
   Workboard      After creating or updating issues — includes issue links
   Publisher      After the write-review-publish loop completes
-  Comms          Handles delivery only; doesn't emit reply events
 </pre>
 
-      <p>The <code>sessions_yield</code> call at the end of each handled event kills the child session on completion. Finished agents that stay resident pile up in the session list, consume memory, and leave the UI cluttered with sessions that have nothing left to do. Explicit teardown is a few extra lines in the Comms listener and pays back quickly.</p>
+      <p>The <code>sessions_yield</code> call at the end of each handled event kills the child session on completion. Finished agents that stay resident pile up in the session list, consume memory, and leave the UI cluttered with sessions that have nothing left to do. Explicit teardown is a few extra lines and pays back quickly.</p>
 
       <hr>
 
@@ -341,27 +357,34 @@
 
       <hr>
 
-      <h2>Current Routing Design (Intent, Not Yet Automated)</h2>
+      <h2>Current Model Assignments (as of March 20)</h2>
 
 <pre>
-  Task type                                  Model
-  ───────────────────────────────────────────────────────────────
-  Real-time Telegram conversation            claude-sonnet-4-6
-  Complex coding / multi-tool chains         claude-sonnet-4-6
-  Publishing (write-review-fix loop)         claude-sonnet-4-6
-  Workboard judgment calls                   claude-sonnet-4-6
-  Heartbeat checks (background, no tools)    gpt-oss:20b
-  Simple email triage (summarize/classify)   claude-haiku-4-5
-  Overnight research (text gen, no tools)    gpt-oss:20b
+  Agent / task type                          Model
+  ───────────────────────────────────────────────────────────────────────────
+  Frank (main) — Telegram, triage,           ollama/qwen3-coder:latest
+    routing, delegation
+  Builder — coding, commits, ships           ollama/gpt-oss:20b
+  Researcher — deep research reports         ollama/gpt-oss:20b
+  Workboard — GitHub issue management        ollama/gpt-oss:20b
+  Publisher — writing, review loop           anthropic/claude-sonnet-4-6
+  Heartbeat checks (background, no tools)    ollama/gpt-oss:20b
+  Overnight research (text gen, no tools)    ollama/gpt-oss:20b
 </pre>
 
-      <p>The cost argument for local models is real for high-frequency background work. A heartbeat that fires every 30 minutes, reads a few files, and checks for anomalies is doing ~500-1000 tokens per call. At 48 calls/day that's ~24K-48K tokens/day from heartbeats alone — $0.07-$0.14/day at Sonnet pricing, or $25-50/year. Free at local inference. But only if the local model can do the task reliably. For heartbeats that don't use tools and just read/summarize, gpt-oss is viable. For anything that touches tools, it isn't yet.</p>
+      <p>Frank switched from gpt-oss:20b to qwen3-coder today after a specific failure: gpt-oss hallucinated a non-existent "ACP runtime" dependency and refused to use <code>sessions_spawn</code>, a tool sitting right in its tool list. The model invented a constraint that didn't exist rather than just calling the tool. qwen3-coder passed the same delegation test cleanly in 7 seconds.</p>
 
-      <p>The routing isn't automated. Currently Amandeep switches models manually via config edit + hot reload. The right implementation is a rules-based router in the gateway config triggered by session type or source channel. Not built yet.</p>
+      <p>The cost argument for local models is real for high-frequency background work. A heartbeat that fires every 30 minutes, reads a few files, and checks for anomalies does ~500-1000 tokens per call. At 48 calls/day that's ~24K-48K tokens/day from heartbeats alone — $0.07-$0.14/day at Sonnet pricing, or $25-50/year. Free at local inference. But only if the model can do the task reliably. For background tasks that don't require tool chaining, gpt-oss is viable. For orchestration (spawning agents, chaining tools, making judgment calls), it isn't reliable.</p>
+
+      <p>The routing isn't automated. Currently model assignments are manual config changes with hot reload. The right implementation is a rules-based router in the gateway config triggered by session type or source channel — not built yet.</p>
 
       <hr>
 
       <h2>Where We Got Stuck — Specific Failure Modes</h2>
+
+      <p><strong>gpt-oss:20b hallucinating a tool constraint.</strong> When Frank was still running on gpt-oss:20b, a delegation task required calling <code>sessions_spawn</code> to spawn a specialist agent. gpt-oss refused. The tool was there. The schema had no such requirement. The model invented one anyway: it claimed the call needed an "ACP runtime dependency" that doesn't exist anywhere in the tool schema. The model fabricated a blocker.</p>
+
+      <p>This is a different failure mode from producing a wrong tool call. A wrong tool call is caught immediately. A hallucinated constraint gets rationalized as a real limitation. The model explains why the thing can't be done, and without prior context you might believe it. qwen3-coder tried the same call, succeeded in 7 seconds, no invented constraints.</p>
 
       <p><strong>Cron job configuration errors.</strong> While setting up isolated cron jobs, hit two specific errors in sequence:</p>
 
@@ -408,6 +431,8 @@
 
       <p><strong>Test tool use before anything else.</strong> The single most important metric for agent models is tool call reliability. Before evaluating write quality, reasoning, or latency — test whether the model can produce valid tool calls consistently on your specific schema. A fast, smart model that fails tool calls 15% of the time is useless for agent work.</p>
 
+      <p><strong>Don't use gpt-oss:20b as an orchestrator.</strong> Narrow schemas, no tool chaining, no spawning — that's where it works. Anything that requires reasoning about what tools are available and calling them across a multi-step workflow, it doesn't.</p>
+
       <p><strong>Don't bother with sub-14B models for tool-heavy agent work.</strong> The reliability gap is real and compounds. The 6.6GB qwen3.5 was tested briefly and dropped — not because it was slow, but because tool call failures made task completion unreliable. At current quantization and hardware, the usable floor for agent work is ~14B, and that's for simple tasks only. For complex multi-step workflows, you need 70B+ or a frontier API.</p>
 
       <p><strong>Don't use local models as reviewers of their own work.</strong> qwen3:14b as writer + qwen3:14b as reviewer = the reviewer rubber-stamps the writer. The model can't self-police against its own failure modes. If you're running a write-review loop on a local model, the reviewer needs to be a different model — or better, a deterministic checker (regex for banned words, structural validation for format compliance) rather than another LLM.</p>
@@ -420,9 +445,7 @@
 
       <h2>Current State</h2>
 
-      <p>After the March 19 session: architecture redesign is done conceptually, partially implemented. context.json and comms-log.jsonl exist and are read at session start. AGENT.md files exist for all five specialists. The automatic routing between models doesn't exist yet — that's a manual config change today.</p>
-
-      <p>The local model experiments concluded that gpt-oss:20b is the strongest local option on this hardware, with the caveat that tool use isn't yet reliable enough for production agent work. It's in the config as the current primary model for background tasks, with Sonnet as the target for conversation and complex agent work.</p>
+      <p>gpt-oss:20b remains in the config for Builder, Researcher, and Workboard. Specialist work, narrow schemas, no orchestration. For anything that involves spawning other agents or reasoning about what tools are available, it's out.</p>
 
       <p>The honest gap between "architecture design" and "architecture implemented" is still large. The system works. The coordination layer is real. The shared state is read and written. But the handoff protocol between agents is followed inconsistently, the routing is manual, and there's no eval loop to detect regressions when agent behavior changes. Those are next.</p>
 
