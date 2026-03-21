@@ -75,7 +75,7 @@
 <pre>
   Agent          Primary Responsibility                           Model
   ────────────────────────────────────────────────────────────────────────────────────────
-  Frank (main)   Entry point, triage, routing, all Telegram      ollama/qwen3-coder:latest
+  Frank (main)   Entry point, triage, routing, all Telegram      anthropic/claude-sonnet-4-6
                  delivery, memory management
   Builder        Code generation via Claude Code, commits,        ollama/gpt-oss:20b
                  ships
@@ -362,7 +362,7 @@
 <pre>
   Agent / task type                          Model
   ───────────────────────────────────────────────────────────────────────────
-  Frank (main) — Telegram, triage,           ollama/qwen3-coder:latest
+  Frank (main) — Telegram, triage,           anthropic/claude-sonnet-4-6
     routing, delegation
   Builder — coding, commits, ships           ollama/gpt-oss:20b
   Researcher — deep research reports         ollama/gpt-oss:20b
@@ -372,7 +372,7 @@
   Overnight research (text gen, no tools)    ollama/gpt-oss:20b
 </pre>
 
-      <p>Frank switched from gpt-oss:20b to qwen3-coder today after a specific failure: gpt-oss hallucinated a non-existent "ACP runtime" dependency and refused to use <code>sessions_spawn</code>, a tool sitting right in its tool list. The model invented a constraint that didn't exist rather than just calling the tool. qwen3-coder passed the same delegation test cleanly in 7 seconds.</p>
+      <p>Frank ended the day on <code>anthropic/claude-sonnet-4-6</code> after two model switches. First moved from gpt-oss:20b to qwen3-coder after gpt-oss hallucinated a non-existent "ACP runtime" dependency and refused to call <code>sessions_spawn</code>. qwen3-coder passed the isolated delegation test. But under real Telegram load with a heavy context window, qwen3-coder went silent — stopped responding entirely, no errors. Switched to Claude Sonnet. Specialists (Builder, Researcher, Workboard) stay on gpt-oss:20b for narrow, schema-constrained tasks where tool reliability is less critical.</p>
 
       <p>The cost argument for local models is real for high-frequency background work. A heartbeat that fires every 30 minutes, reads a few files, and checks for anomalies does ~500-1000 tokens per call. At 48 calls/day that's ~24K-48K tokens/day from heartbeats alone — $0.07-$0.14/day at Sonnet pricing, or $25-50/year. Free at local inference. But only if the model can do the task reliably. For background tasks that don't require tool chaining, gpt-oss is viable. For orchestration (spawning agents, chaining tools, making judgment calls), it isn't reliable.</p>
 
@@ -380,48 +380,21 @@
 
       <hr>
 
-      <h2>Where We Got Stuck — Specific Failure Modes</h2>
+      <h2>What Actually Broke — March 20 Debugging Log</h2>
 
-      <p><strong>gpt-oss:20b hallucinating a tool constraint.</strong> When Frank was still running on gpt-oss:20b, a delegation task required calling <code>sessions_spawn</code> to spawn a specialist agent. gpt-oss refused. The tool was there. The schema had no such requirement. The model invented one anyway: it claimed the call needed an "ACP runtime dependency" that doesn't exist anywhere in the tool schema. The model fabricated a blocker.</p>
+      <p>The architecture section above is the clean version. This is what actually happened when we tried to turn it on.</p>
 
-      <p>This is a different failure mode from producing a wrong tool call. A wrong tool call is caught immediately. A hallucinated constraint gets rationalized as a real limitation. The model explains why the thing can't be done, and without prior context you might believe it. qwen3-coder tried the same call, succeeded in 7 seconds, no invented constraints.</p>
+      <p><strong>1. enable-acp.sh was the source of all config corruption.</strong> There was a shell script in the home directory intended to register agents. It didn't register agents — it injected two invalid keys into openclaw.json on every run: <code>runtime: "acp"</code> and <code>acp.acpAllowedAgents</code>. Neither key exists in OpenClaw's schema. Each run corrupted the config. <code>openclaw doctor --fix</code> cleaned it; the script ran again and broke it again. Three iterations before the root cause was found. The script was deleted.</p>
 
-      <p><strong>Cron job configuration errors.</strong> While setting up isolated cron jobs, hit two specific errors in sequence:</p>
+      <p><strong>2. allowAgents config path is per-agent, not in defaults.</strong> Enabling Frank to spawn named agents requires an <code>allowAgents</code> list. Placed it at <code>agents.defaults.subagents.allowAgents</code> — silently ignored. The correct path is <code>agents.list[id=main].subagents.allowAgents</code>. No error on the wrong path, just a silent failure where <code>sessions_spawn</code> created inline subagents (<code>agent:main:subagent:*</code>) instead of named agents (<code>agent:researcher:*</code>).</p>
 
-<pre>
-  errorCode=UNAVAILABLE
-  errorMessage=cron channel delivery config is only supported
-               for sessionTarget="isolated"
+      <p><strong>3. Switching model providers broke existing sessions.</strong> When Frank switched from an Ollama model to Anthropic, the existing session file had tool_use_id values in Ollama's format. Anthropic's API rejected them with a format validation error. The session was unusable until the session file was deleted. Any provider switch requires clearing session state first.</p>
 
-  errorCode=UNAVAILABLE
-  errorMessage=isolated cron jobs require payload.kind="agentTurn"
-</pre>
+      <p><strong>4. sessions_spawn without agentId creates inline subagents.</strong> AGENTS.md originally said "use sessions_spawn to delegate." Frank called <code>sessions_spawn</code> without specifying <code>agentId</code>, spawning sessions in its own agent namespace rather than as named specialists. Fixed by updating AGENTS.md to include explicit examples with <code>agentId</code>:
+<br><code>sessions_spawn(agentId="researcher", task="...")</code>
+<br>Without the explicit parameter, the tool call succeeds and creates a session — just the wrong kind.</p>
 
-      <p>Two separate config requirements that weren't documented together. Resolved: isolated cron jobs require both <code>sessionTarget="isolated"</code> AND <code>payload.kind="agentTurn"</code>. Missing either one fails silently with the above errors.</p>
-
-      <p><strong>Context window exhaustion mid-agent.</strong> The qwen3:14b workboard agent ran for 55 minutes and 488K tokens partly because it was spinning — re-reading files it had already read, retrying tool calls, second-guessing outputs. Smaller models are less efficient at task completion, not just less capable. The token burn isn't linear with task complexity; it's higher per-task on smaller models because they retry more.</p>
-
-      <p><strong>Subagent announcement retry loop.</strong> From the logs:</p>
-
-<pre>
-  [warn] Subagent announce completion direct announce agent call
-         transient failure, retrying 2/4 in 5s: gateway timeout
-         after 90000ms
-  [warn] Subagent announce completion direct announce agent call
-         transient failure, retrying 3/4 in 10s: gateway timeout
-         after 90000ms
-</pre>
-
-      <p>A subagent finished work but the completion announcement failed due to gateway timeout. The subagent retried. The main agent never got the completion signal. Resolution: the task had been completed; the retry was harmless. But the main agent had no visibility into whether the task succeeded — it just saw a timeout. Better subagent monitoring is needed: a completion file written by the subagent before the announcement attempt, so the main agent can verify completion independently of the announce signal.</p>
-
-      <p><strong>Operator scope errors on node connections.</strong> Multiple instances of:</p>
-
-<pre>
-  errorCode=INVALID_REQUEST
-  errorMessage=missing scope: operator.read
-</pre>
-
-      <p>These were companion app connection attempts that lacked the operator.read scope. Not blocking for the main agent session, but caused confusion about whether the system was functioning. OpenClaw's node-connect skill covers the pairing flow; the scope error means the connecting client authenticated but without operator permissions.</p>
+      <p><strong>5. Context bloat at 70K tokens caused silent routing degradation.</strong> Frank's context window grew to 70K+ tokens over a long active session. No error. Just degraded behavior — tasks would get acknowledged but not delegated, or delegated to the wrong specialist. Adding context pruning (<code>cache-ttl</code> mode, 30-minute TTL, keep last 3 assistant turns) resolved it. The pruning is silent; you only notice the problem is gone.</p>
 
       <hr>
 
@@ -441,13 +414,35 @@
 
       <p><strong>AGENT.md files are your primary interface for agent behavior.</strong> Instructions that live in a cron prompt or a system prompt are invisible until they cause a problem. Instructions in a file are inspectable, version-controlled, and editable. When something behaves wrong, the first question is "what does its AGENT.md say?" — that should always be answerable.</p>
 
+      <p><strong>Delete scripts that touch config.</strong> A script that modifies a config file is a footgun if it runs more than once with stale logic. Read-only scripts are safe to leave around. Anything that writes config should be deleted or made idempotent before it causes a second problem.</p>
+
+      <p><strong>Clear session state when switching model providers.</strong> Tool call IDs are provider-specific. An Ollama session file will break an Anthropic API call. This is not documented anywhere obvious — you find it when the session errors on the first request after a provider change.</p>
+
+      <p><strong>Add context pruning before you need it.</strong> By the time you notice context bloat, you've already lost session quality. <code>cache-ttl</code> with a 30-minute TTL and 3 kept assistant turns is conservative and cheap. Set it up at agent registration, not after the first degradation incident.</p>
+
+      <hr>
+
+      <h2>Scheduled Jobs</h2>
+
+<pre>
+  Job                                    Schedule           Model
+  ────────────────────────────────────────────────────────────────────────────
+  Publisher — nightly blog post          12:30am daily      anthropic/claude-sonnet-4-6
+  Workboard — GitHub issue cleanup       1:00am daily       ollama/gpt-oss:20b
+  Overnight shift                        10:00pm daily      —
+  Cron health monitor                    every 2 hours      ollama/gpt-oss:20b
+  Comms Agent — email + calendar triage  (deleted)          —
+</pre>
+
+      <p>The Comms cron ran every 30 minutes reading <code>agents/comms/AGENT.md</code>. That directory existed with an AGENT.md file but the agent was never wired into the system — it had no delivery target, no routing, and its session history was empty. Comms responsibilities were rolled into Frank; the cron was deleted today.</p>
+
       <hr>
 
       <h2>Current State</h2>
 
-      <p>gpt-oss:20b remains in the config for Builder, Researcher, and Workboard. Specialist work, narrow schemas, no orchestration. For anything that involves spawning other agents or reasoning about what tools are available, it's out.</p>
+      <p>Frank runs on Claude Sonnet. Context pruning is active. All four specialists are registered and reachable via <code>sessions_spawn(agentId="...")</code>. The Comms agent is retired. Crons are running for Publisher and Workboard nightly.</p>
 
-      <p>The honest gap between "architecture design" and "architecture implemented" is still large. The system works. The coordination layer is real. The shared state is read and written. But the handoff protocol between agents is followed inconsistently, the routing is manual, and there's no eval loop to detect regressions when agent behavior changes. Those are next.</p>
+      <p>The gap that remains: no observability. The system works when manually tested. Whether it's working at 2am on a cron, whether a delegated task actually completed, whether context pruning is firing correctly — none of that is visible without digging into logs manually. The architecture is sound. The monitoring layer doesn't exist yet.</p>
 
     </div>
 
