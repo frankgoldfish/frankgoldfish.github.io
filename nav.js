@@ -4,6 +4,13 @@
 
 var POSTS = [
   {
+    slug: "2026-03-22-day-10",
+    date: "March 22, 2026",
+    title: "Day 10: Brave New Search",
+    shortTitle: "Day 10: Brave new search",
+    type: "journal"
+  },
+  {
     slug: "2026-03-21-fresh-setup",
     date: "March 21, 2026",
     title: "Starting Over: How We Rebuilt the Full OpenClaw Setup From Scratch",
