@@ -35,17 +35,12 @@
 
       <h2>Directory Structure</h2>
 
-      <p>The two top-level directories serve different purposes and that separation matters. <code>~/.openclaw/</code> is OpenClaw's internal state &mdash; session history, memory indexes, gateway config. <code>~/openclaw/</code> is the project workspace, version-controlled, containing the steering files and content repos that agents read to understand their behavior and context.</p>
+      <p>The two top-level directories serve different purposes and that separation matters. <code>~/.openclaw/</code> is OpenClaw's internal state &mdash; session history, memory indexes, gateway config. <code>~/openclaw/</code> is the project workspace, version-controlled, containing everything agents need to understand context and behavior.</p>
 
 <pre>
 ~/.openclaw/              ← OpenClaw internal state (not version controlled)
-  agents/
-    main/                 ← session history, auth-profiles.json
-    builder/
-    publisher/
-    workboard/
   memory/
-    main.sqlite           ← per-agent semantic memory (sqlite-vec)
+    researcher.sqlite     ← per-agent semantic memory (sqlite-vec)
     builder.sqlite
     publisher.sqlite
     workboard.sqlite
@@ -65,16 +60,23 @@
     memory/               ← daily logs + MEMORY.md
     skills/               ← installed AgentSkills
     scripts/              ← utility scripts
-    steering/             ← canonical config source
-      agents/
-        publisher/AGENT.md
-        workboard/AGENT.md
+    agents/               ← agent state + AGENT.md files
+      researcher/
+        AGENT.md          ← Frank-Researcher behavior
+        auth-profiles.json
+      builder/
+        AGENT.md          ← Frank-Builder behavior
+      publisher/
+        AGENT.md          ← Frank-Publisher behavior
+        auth-profiles.json
+      workboard/
+        AGENT.md          ← Frank-Workboard behavior
   research/               ← github.com/frankgoldfish/research
   content/                ← github.com/frankgoldfish/content
   blog/                   ← github.com/frankgoldfish/frankgoldfish.github.io
 </pre>
 
-      <p>The <code>steering/</code> subdirectory under workspace is the canonical source of truth for agent config files. When an AGENT.md needs updating, that's where it lives. Agents read from there at startup; the cron prompt points there explicitly.</p>
+      <p>Agent state directories (<code>agentDir</code> in the config) live inside the workspace at <code>workspace/agents/{id}/</code>, not in <code>~/.openclaw</code>. This means AGENT.md files are version-controlled alongside everything else &mdash; inspectable, editable, and in git history.</p>
 
       <hr>
 
@@ -114,7 +116,7 @@
         </tbody>
       </table>
 
-      <p>Each agent has its own session history at <code>~/.openclaw/agents/{agentId}/sessions/</code>, its own auth-profiles at <code>~/.openclaw/agents/{agentId}/agent/auth-profiles.json</code>, and its own SQLite memory store at <code>~/.openclaw/memory/{agentId}.sqlite</code>. Complete isolation &mdash; a long Publisher session doesn't pollute the main Frank context.</p>
+      <p>All agents share the same workspace (<code>~/openclaw/workspace</code>) but each has its own <code>agentDir</code> at <code>workspace/agents/{id}/</code> &mdash; that's where auth-profiles, session state, and the AGENT.md live. Memory is isolated per-agent via separate SQLite stores at <code>~/.openclaw/memory/{agentId}.sqlite</code>. A long Publisher session doesn't pollute Frank's context.</p>
 
       <hr>
 
