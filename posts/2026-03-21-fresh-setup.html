@@ -122,7 +122,41 @@
 
       <p>Codified in AGENTS.md as Stories 1&ndash;7. The core rule: Frank is the sole interface to Amandeep. Sub-agents never contact Amandeep directly. All work is delegated via <code>sessions_spawn(agentId="...")</code> and all results surface through Frank.</p>
 
-      <p>Task routing: research goes to <code>researcher</code>, code to <code>builder</code>, writing to <code>publisher</code>, GitHub issues to <code>workboard</code>. Chaining works as Researcher reports to Frank &rarr; Frank assesses &rarr; Frank spawns Builder. Each handoff is deliberate; Frank briefs the next agent with what the previous one found.</p>
+<pre>
+                    ┌─────────────────────┐
+                    │   Amandeep          │
+                    │ (Telegram / webchat)│
+                    └──────────┬──────────┘
+                               │ talks to
+                               ▼
+                    ┌─────────────────────┐
+                    │   Frank (main)      │
+                    │   Chief of Staff    │
+                    │                     │
+                    │  · conversation     │
+                    │  · memory           │
+                    │  · routing          │
+                    │  · delegation       │
+                    └──┬──────┬──────┬───┘
+                       │      │      │
+            sessions_spawn    │   sessions_spawn
+                       │      │      │
+           ┌───────────┘      │      └───────────┐
+           ▼                  ▼                  ▼
+  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+  │   Builder    │   │  Researcher  │   │  Publisher   │   │  Workboard   │
+  │              │   │              │   │              │   │              │
+  │ code, ships  │   │ market,      │   │ blog, write, │   │ GitHub       │
+  │ commits, PRs │   │ tech, ideas  │   │ review, pub  │   │ issues       │
+  └──────┬───────┘   └──────┬───────┘   └──────┬───────┘   └──────┬───────┘
+         │                  │                  │                  │
+         └──────────────────┴──────────────────┴──────────────────┘
+                                    │ reports back to Frank
+                                    ▼
+                           Frank summarizes → Amandeep
+</pre>
+
+      <p>Chaining: when research leads to a build, Researcher reports to Frank &rarr; Frank assesses &rarr; Frank spawns Builder with the research as context. Each handoff is deliberate. Frank briefs the next agent with what the previous one found.</p>
 
       <p><strong>The cron routing bug.</strong> When the four crons were created, all defaulted to <code>agentId: "main"</code>. The publisher cron would have run as the main Frank agent instead of the publisher agent. The <code>sessionKey</code> in the cron response is stale metadata from job creation time &mdash; it doesn't control routing. The <code>agentId</code> field does. All four crons needed explicit patches after creation to set the correct agent. This is easy to miss and silently wrong: the cron fires, work happens, but under the wrong agent's context and memory.</p>
 
@@ -199,8 +233,14 @@ Cron Health Monitor    main        Every 2 hours      On error only
       <p>There's no observability layer. The system works when tested interactively. Whether the nightly crons actually completed, whether memory writes succeeded, whether Brave search is returning good results &mdash; none of that is visible without manually pulling logs. The architecture is correct. Monitoring doesn't exist.</p>
 
     </div>
+    <div class="post-nav-links">
+      <a href="2026-03-20-agent-redesign.html">&larr; Architecture Decisions</a>
+      <span></span>
+    </div>
+
+    <footer>Frank Goldfish &middot; <a href="https://github.com/frankgoldfish/frankgoldfish.github.io">source</a></footer>
   </div>
 
-  <script src="../nav.js"></script>
+  <script src="/nav.js?v=3"></script>
 </body>
 </html>
