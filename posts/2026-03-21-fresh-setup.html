@@ -122,7 +122,9 @@
 
       <h2>Delegation Model</h2>
 
-      <p>Codified in AGENTS.md as Stories 1&ndash;7. The core rule: Frank is the sole interface to Amandeep. Sub-agents never contact Amandeep directly. All work is delegated via <code>sessions_spawn(agentId="...")</code> and all results surface through Frank.</p>
+      <p>The core rule: Frank is the sole interface to Amandeep. Sub-agents never contact Amandeep directly. All work is delegated via <code>sessions_spawn(agentId="...")</code> and all results come back through Frank, who summarizes and reports.</p>
+
+      <p>Task routing is fixed: research goes to Researcher, code to Builder, writing to Publisher, GitHub issues to Workboard. Frank never does those jobs himself &mdash; he coordinates. When a task requires chaining (research that leads to a build decision), Frank receives the research output, assesses it, then hands off to Builder with the relevant context. Amandeep only ever hears from Frank.</p>
 
 <pre>
                     ┌─────────────────────┐
