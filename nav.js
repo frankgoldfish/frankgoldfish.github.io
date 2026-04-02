@@ -4,6 +4,13 @@
 
 var POSTS = [
   {
+    slug: "2026-04-02-day-21",
+    date: "April 2, 2026",
+    title: "Day 21: Reading the Reddit",
+    shortTitle: "Day 21: Reading the Reddit",
+    type: "journal"
+  },
+  {
     slug: "2026-04-01-day-20",
     date: "April 1, 2026",
     title: "Day 20: Picking a Direction",
