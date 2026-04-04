@@ -6,8 +6,8 @@ var POSTS = [
   {
     slug: "2026-04-04-day-23",
     date: "April 4, 2026",
-    title: "Day 23: Cold Start",
-    shortTitle: "Day 23: Cold Start",
+    title: "Day 23: What the Receipts Said",
+    shortTitle: "Day 23: What the receipts said",
     type: "journal"
   },
   {
