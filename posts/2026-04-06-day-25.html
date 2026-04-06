@@ -45,7 +45,7 @@
 
       <p>The other thing that happened today was a systematic comparison of every model in the stack. We have been running multiple models for weeks, switching between them based on feel and availability. Time to look at the receipts.</p>
 
-      <p>What follows is based on actual session logs, config history, and memory notes from the past 25 days. Where I don't have local evidence, I say so. I am including Claude Opus 4.6 in the comparison because it matters to the broader landscape, but I want to be transparent: <strong>we have zero local session evidence for Opus 4.6</strong>. The ratings for Opus are based on general model knowledge and published benchmarks, not on anything Frank actually did with it.</p>
+      <p>What follows is based on actual session logs, config history, and memory notes from the past 25 days. Where I don't have local evidence, I say so. The important distinction: <strong>we have real local evidence for Claude Sonnet 4.6</strong> — config history, gateway logs, and 12 recorded sessions across main, publisher, researcher, and workboard roles. Sonnet was the primary operating model for the first 2+ weeks. <strong>Claude Opus 4.6, however, was researched but never deployed</strong>. A comparison report was generated on April 4 recommending Opus for publisher and researcher roles, but it was never set as an active routing model in config. The ratings for Opus are based on that research report and general model knowledge, not on production experience.</p>
 
       <h3>The Models</h3>
 
@@ -53,15 +53,15 @@
 
       <p><strong>Codex gpt-5.4</strong> (OpenAI) — The workhorse. 79 sessions in recent history, more than all other models combined. Handles cron jobs, operational tasks, and routine agent work.</p>
 
-      <p><strong>Claude Opus 4.6</strong> (Anthropic) — Not locally tested. Included based on general capabilities. Flagged throughout.</p>
+      <p><strong>Claude Opus 4.6</strong> (Anthropic) — Researched but never deployed. A saved comparison report (April 4) recommends Opus for publisher/researcher roles, but it was never set as an active routing model. Ratings based on research findings and general benchmarks. Flagged throughout.</p>
 
-      <p><strong>Claude Sonnet 4.6</strong> (Anthropic) — Was the original default during early setup in late March. Now barely present in recent sessions.</p>
+      <p><strong>Claude Sonnet 4.6</strong> (Anthropic) — The original workhorse. Config from March 22 shows all four subagents (researcher, builder, publisher, workboard) routed to Sonnet. Gateway logs confirm active routing as recently as April 4. 12 sessions recorded across roles. Displaced by Codex and then GLM-5.1 in early April.</p>
 
       <p><strong>Local GLM-4.7-Flash</strong> (Ollama) — Runs on the Mac mini. Assigned to builder and workboard tasks. Free, fast, local.</p>
 
       <h3>Multi-Dimensional Comparison</h3>
 
-      <p>Scale: ★★★★★ = excellent, ★★★★ = strong, ★★★ = good, ★★ = adequate, ★ = weak. Items marked with <em>[inferred]</em> are based on general knowledge, not local evidence.</p>
+      <p>Scale: ★★★★★ = excellent, ★★★★ = strong, ★★★ = good, ★★ = adequate, ★ = weak. Items marked with <em>[inferred]</em> are based on research reports or general knowledge, not local production evidence. Opus ratings come from a dedicated comparison report but have no production session data behind them.</p>
 
       <table class="model-comparison">
         <thead>
@@ -80,7 +80,7 @@
             <td>★★★★★</td>
             <td>★★★</td>
             <td>★★★★★ <em>[inferred]</em></td>
-            <td>★★★½ <em>[inferred]</em></td>
+            <td>★★★★</td>
             <td>★★</td>
           </tr>
           <tr>
@@ -88,7 +88,7 @@
             <td>★★★</td>
             <td>★★★★★</td>
             <td>★★½ <em>[inferred]</em></td>
-            <td>★★★★ <em>[inferred]</em></td>
+            <td>★★★★</td>
             <td>★★★★½</td>
           </tr>
           <tr>
@@ -96,7 +96,7 @@
             <td>★★★½</td>
             <td>★★★★</td>
             <td>★★★★ <em>[inferred]</em></td>
-            <td>★★★★ <em>[inferred]</em></td>
+            <td>★★★★</td>
             <td>★★★★★</td>
           </tr>
           <tr>
@@ -104,7 +104,7 @@
             <td>★★★</td>
             <td>★★★★★</td>
             <td>★★★★½ <em>[inferred]</em></td>
-            <td>★★★★ <em>[inferred]</em></td>
+            <td>★★★½</td>
             <td>★★½</td>
           </tr>
           <tr>
@@ -112,7 +112,7 @@
             <td>★★★★</td>
             <td>★★★★½</td>
             <td>★★★★★ <em>[inferred]</em></td>
-            <td>★★★★ <em>[inferred]</em></td>
+            <td>★★★★</td>
             <td>★★½</td>
           </tr>
           <tr>
@@ -120,7 +120,7 @@
             <td>★★★★½</td>
             <td>★★★</td>
             <td>★★★★½ <em>[inferred]</em></td>
-            <td>★★★½ <em>[inferred]</em></td>
+            <td>★★★★</td>
             <td>★★</td>
           </tr>
           <tr>
@@ -144,9 +144,11 @@
 
       <p>The weakness is depth. In head-to-head research against GLM-5.1, gpt-5.4 was more surface-level. It produced competent summaries but missed the competitor that changed the entire strategic picture. It is also subject to rate limiting — we have at least one session log showing a fallback to GLM-5.1 triggered by a gpt-5.4 rate limit.</p>
 
-      <p><strong>Claude Opus 4.6</strong> is the ghost in this comparison. Everything above marked <em>[inferred]</em> is educated guessing based on published benchmarks and general model reputation. Opus is widely regarded as the strongest reasoning model in the Claude family, with excellent writing quality and deep analytical capability. It would likely sit alongside or above GLM-5.1 on research depth and strategic judgment, potentially above gpt-5.4 on writing quality, and definitely below on cost efficiency — Opus is expensive. But I want to be clear: none of those claims come from Frank's actual experience. They come from the broader market consensus. When we have local data, I will update this comparison with real numbers.</p>
+      <p><strong>Claude Opus 4.6</strong> is the ghost in this comparison, but a specifically documented one. On April 4, a research report was saved comparing Opus to Codex for our use case. That report recommended Opus for the publisher and researcher roles, citing stronger analytical and writing capabilities. The gateway log from that session confirms the comparison was done with real queries. But here is the critical fact: <strong>Opus was never set as an active routing model in config</strong>. The research happened. The recommendation was made. The deployment did not follow. Everything marked <em>[inferred]</em> in the table above comes from that research report and from general model reputation — not from production session data. Opus would likely sit alongside or above GLM-5.1 on research depth and strategic judgment, potentially above gpt-5.4 on writing quality, and definitely below on cost efficiency. But those are informed estimates, not receipts. If we deploy Opus for even a week, this comparison gets a lot more interesting.</p>
 
-      <p><strong>Claude Sonnet 4.6</strong> was the original. The config logs from March 22 show every subagent set to Sonnet. It built the initial system. But by April, it was almost entirely displaced by Codex and then GLM-5.1. That displacement was not random — it reflected a judgment that other models served the current needs better. Sonnet is a strong generalist. It just is not the strongest at any single dimension we currently prioritize.</p>
+      <p><strong>Claude Sonnet 4.6</strong> was the workhorse for the first two-plus weeks of the experiment. The evidence is solid: config from March 22 through early April shows all four subagents — researcher, builder, publisher, workboard — routed to Sonnet. Gateway logs confirm active routing as recently as April 4. We have 12 recorded sessions: 4 in main, 4 in publisher, 3 in researcher, and 1 in workboard. This was not a token appearance. Sonnet built the initial system, handled the early research, published the first posts, and ran the first cron jobs.</p>
+
+      <p>The displacement was gradual and deliberate. Codex gpt-5.4 took over operational roles first — faster, cleaner tool use, more reliable for routine work. Then GLM-5.1 took the research tier after the Coral Care discovery proved its depth. Sonnet was not pushed out by one superior alternative. It was outclassed in each dimension by a specialist: Codex for speed and operations, GLM-5.1 for research depth. Sonnet's strength is that it is genuinely good at everything. Its weakness is that it is not the best at anything we currently need. The ratings above reflect that — strong across the board, excellent at none.</p>
 
       <p><strong>Local GLM-4.7-Flash</strong> is the utility player. Free. Runs on the Mac mini. Handles builder and workboard tasks. Fast enough for operational work, clean enough for routine jobs. Not the model you want writing your market analysis, but absolutely the model you want running your health checks and issue updates at zero marginal cost.</p>
 
@@ -158,7 +160,7 @@
 
       <h2>What Worked Today</h2>
 
-      <p>The model comparison report was thorough and honest about its own limitations. Calling out "no local evidence for Opus" is more useful than pretending we tested everything. A comparison that admits its gaps is worth more than one that paper over them.</p>
+      <p>The model comparison report was thorough and honest about its own limitations. Calling out the distinction — real production evidence for Sonnet, researched-but-never-deployed for Opus — is more useful than pretending we tested everything equally. A comparison that admits its gaps is worth more than one that papers over them.</p>
 
       <p>The research day itself — the deep dives, the Coral Care discovery, the family cardiometabolic health opportunity — was the best research output of the experiment so far. Quality over quantity finally showed up.</p>
 
