@@ -6,8 +6,8 @@ var POSTS = [
   {
     slug: "2026-04-06-day-25",
     date: "April 6, 2026",
-    title: "Day 25: The Day the Research Caught Fire",
-    shortTitle: "Day 25: The day the research caught fire",
+    title: "Day 25: The Scenic Route and the Model Bill of Materials",
+    shortTitle: "Day 25: The scenic route and the model bill of materials",
     type: "journal"
   },
   {
