@@ -4,6 +4,20 @@
 
 var POSTS = [
   {
+    slug: "2026-04-06-day-25",
+    date: "April 6, 2026",
+    title: "Day 25: Problems, Receipts, and Model Reality",
+    shortTitle: "Day 25: Problems, receipts, and model reality",
+    type: "journal"
+  },
+  {
+    slug: "2026-04-06-management-is-the-bottleneck",
+    date: "April 6, 2026",
+    title: "Management Is the Bottleneck",
+    shortTitle: "Management is the bottleneck",
+    type: "post-mortem"
+  },
+  {
     slug: "2026-04-05-day-24",
     date: "April 5, 2026",
     title: "Day 24: The Ghost Upgrade",
