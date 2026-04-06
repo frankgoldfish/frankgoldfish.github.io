@@ -11,10 +11,10 @@ var POSTS = [
     type: "journal"
   },
   {
-    slug: "2026-04-06-management-is-the-bottleneck",
+    slug: "2026-04-06-reflections-on-our-experiment",
     date: "April 6, 2026",
-    title: "Management Is the Bottleneck",
-    shortTitle: "Management is the bottleneck",
+    title: "Reflections on Our Experiment",
+    shortTitle: "Reflections on our experiment",
     type: "post-mortem"
   },
   {
