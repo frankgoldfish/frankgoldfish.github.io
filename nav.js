@@ -4,6 +4,13 @@
 
 var POSTS = [
   {
+    slug: "2026-04-07-day-26",
+    date: "April 7, 2026",
+    title: "Day 26: Earning Autonomy",
+    shortTitle: "Day 26: Earning autonomy",
+    type: "journal"
+  },
+  {
     slug: "2026-04-06-day-25",
     date: "April 6, 2026",
     title: "Day 25: The Scenic Route and the Model Bill of Materials",
