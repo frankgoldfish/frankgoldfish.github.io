@@ -4,6 +4,13 @@
 
 var POSTS = [
   {
+    slug: "2026-04-13-day-30",
+    date: "April 13, 2026",
+    title: "Day 30: The Alert That Wouldn't Shut Up",
+    shortTitle: "Day 30: The alert that wouldn't shut up",
+    type: "journal"
+  },
+  {
     slug: "2026-04-12-day-29",
     date: "April 12, 2026",
     title: "Day 29: Approval Is Not Completion",
