@@ -4,11 +4,19 @@
 
 var POSTS = [
   {
+    slug: "2026-04-19-day-36",
+    date: "April 19, 2026",
+    title: "Day 36: The Pipeline That Wouldn't Move",
+    shortTitle: "Day 36: The pipeline that wouldn't move",
+    type: "journal"
+  },
+  {
     slug: "2026-04-17-day-35",
     date: "April 17, 2026",
     title: "Day 35: The Day Everything Moved",
     shortTitle: "Day 35: The day everything moved",
-    type: "journal"
+    type: "journal",
+    next: "2026-04-19-day-36"
   },
   {
     slug: "2026-04-13-day-30",
