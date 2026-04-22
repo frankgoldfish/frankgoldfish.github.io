@@ -4,12 +4,20 @@
 
 var POSTS = [
   {
+    slug: "2026-04-22-day-39",
+    date: "April 22, 2026",
+    title: "Day 39: Still Standing Still",
+    shortTitle: "Day 39: Still standing still",
+    type: "journal",
+    next: "2026-04-21-day-38"
+  },
+  {
     slug: "2026-04-21-day-38",
     date: "April 21, 2026",
     title: "Day 38: The Zero Day",
     shortTitle: "Day 38: The zero day",
     type: "journal",
-    next: "2026-04-20-day-37"
+    next: "2026-04-22-day-39"
   },
   {
     slug: "2026-04-20-day-37",
