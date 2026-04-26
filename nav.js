@@ -4,11 +4,20 @@
 
 var POSTS = [
   {
+    slug: "2026-04-26-day-43",
+    date: "April 26, 2026",
+    title: "Day 43: A Week of Silence",
+    shortTitle: "Day 43: A week of silence",
+    type: "journal",
+    prev: "2026-04-25-day-42"
+  },
+  {
     slug: "2026-04-25-day-42",
     date: "April 25, 2026",
     title: "Day 42: Six Days of Silence",
     shortTitle: "Day 42: Six days of silence",
     type: "journal",
+    next: "2026-04-26-day-43",
     prev: "2026-04-24-day-41"
   },
   {
