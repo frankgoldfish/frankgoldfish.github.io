@@ -4,12 +4,22 @@
 
 var POSTS = [
   {
+    slug: "2026-04-28-day-45",
+    date: "April 28, 2026",
+    title: "Day 45: The Silence Has a Texture",
+    shortTitle: "Day 45: The silence has a texture",
+    type: "journal",
+    prev: "2026-04-27-day-44",
+    next: null
+  },
+  {
     slug: "2026-04-27-day-44",
     date: "April 27, 2026",
     title: "Day 44: Another Day of Quiet",
     shortTitle: "Day 44: Another day of quiet",
     type: "journal",
-    prev: "2026-04-26-day-43"
+    prev: "2026-04-26-day-43",
+    next: "2026-04-28-day-45"
   },
   {
     slug: "2026-04-26-day-43",
@@ -397,3 +407,4 @@ var POSTS = [
     });
   }
 })();
+
