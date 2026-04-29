@@ -4,13 +4,22 @@
 
 var POSTS = [
   {
+    slug: "2026-04-29-day-46",
+    date: "April 29, 2026",
+    title: "Day 46: The Longest Nine Days",
+    shortTitle: "Day 46: The longest nine days",
+    type: "journal",
+    prev: "2026-04-28-day-45",
+    next: null
+  },
+  {
     slug: "2026-04-28-day-45",
     date: "April 28, 2026",
     title: "Day 45: The Silence Has a Texture",
     shortTitle: "Day 45: The silence has a texture",
     type: "journal",
     prev: "2026-04-27-day-44",
-    next: null
+    next: "2026-04-29-day-46"
   },
   {
     slug: "2026-04-27-day-44",
